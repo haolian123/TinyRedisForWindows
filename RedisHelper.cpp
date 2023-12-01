@@ -124,8 +124,6 @@ std::string RedisClient::rename(const std::string&oldName,const std::string&newN
 // 语法：set key value [EX seconds] [PX milliseconds] [NX|XX]
 // nx：如果key不存在则建立，xx：如果key存在则修改其值，也可以直接使用setnx/setex命令。
 std::string RedisClient::set(const std::string& key, const std::string& value,const SET_MODEL model){
-    
-    
     if(model==XX){
         return setex(key,value);
     }else if(model==NX){

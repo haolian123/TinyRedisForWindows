@@ -1,7 +1,7 @@
 #ifndef REDISHELPER_H
 #define REDISHELPER_H
 #include"SkipList.h"
-#include"global.h"
+// #include"global.h"
 const std::string DEFAULT_DB_FOLDER="data_files";
 const std::string DATABASE_FILE_NAME="db";
 //增删改查操作
@@ -18,8 +18,6 @@ private:
     void loadData(std::string loadPath);
     std::string getFilePath();
 public:
-
-
     //选择数据库
     std::string select(int index);
 
