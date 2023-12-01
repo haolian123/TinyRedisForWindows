@@ -44,6 +44,7 @@ private:
     bool isVaildString(const std::string&line);
 public:
     SkipList();
+    ~SkipList();
     bool addItem(const Key& key, const Value& value);
     bool modifyItem(const Key& key, const Value& value);
     std::shared_ptr<SkipListNode<Key,Value>> searchItem(const Key& key);
@@ -237,4 +238,13 @@ int SkipList<Key,Value>::randomLevel()
     return level;
 }
 
+template<typename Key,typename Value>
+SkipList<Key,Value>::~SkipList(){
+    if(this->readFile){
+        readFile.close();
+    }
+    if(this->writeFile){
+        writeFile.close();
+    }
+}
 #endif
