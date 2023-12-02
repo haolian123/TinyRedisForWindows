@@ -23,7 +23,13 @@ std::shared_ptr<CommandParser> ParserFlyweightFactory::getParser(std::string& co
 
 
 std::shared_ptr<CommandParser> ParserFlyweightFactory::createCommandParser(std::string& command){
-    Command op= commandMaps[command];
+    Command op;
+    if(commandMaps.find(command)==commandMaps.end()){
+        op=INVALID_COMMAND;
+    }else{
+        op=commandMaps[command];
+    }
+    
     switch(op){
         case SET:{
             parserMaps[command]=std::make_shared<SetParser>();

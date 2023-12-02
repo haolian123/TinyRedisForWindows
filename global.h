@@ -27,7 +27,8 @@ enum Command{
     MGET,
     STRLEN,
     APPEND,
-    KEYS
+    KEYS,
+    INVALID_COMMAND
 };
 
 static std::unordered_map<std::string,enum Command>commandMaps={
