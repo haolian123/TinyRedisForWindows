@@ -54,10 +54,9 @@ std::string RedisClient::select(int index){
 std::string RedisClient::keys(const std::string pattern){
     std::string res="";
     auto node=redisDataBase->getHead()->forward[0];
+    int count=0;
     while(node!=nullptr){
-        res.append("\"");
-        res.append(node->key);
-        res.append("\",");
+        res+=std::to_string(++count)+") "+"\""+node->key+"\""+"\n";
         node=node->forward[0];
     }
     res.pop_back();
@@ -272,7 +271,7 @@ std::string RedisClient::mget(std::vector<std::string>&keys){
         }
         
     }
-    
+    res.pop_back();
     return res;
 }
 // 获取值长度
