@@ -12,14 +12,45 @@ enum Command{
     SET,
     SETNX,
     SETEX,
-    GET
+    GET,
+    SELECT,
+    DBSIZE,
+    EXISTS,
+    DEL,
+    RENAME,
+    INCR,
+    INCRBY,
+    INCRBYFLOAT,
+    DECR,
+    DECRBY,
+    MSET,
+    MGET,
+    STRLEN,
+    APPEND,
+    KEYS
 };
 
 static std::unordered_map<std::string,enum Command>commandMaps={
     {"set",SET},
     {"setnx",SETNX},
     {"setex",SETEX},
-    {"get",GET}
+    {"get",GET},
+    {"select",SELECT},
+    {"dbsize",DBSIZE},
+    {"exists",EXISTS},
+    {"del",DEL},
+    {"rename",RENAME},
+    {"incr",INCR},
+    {"incrby",INCRBY},
+    {"incrbyfloat",INCRBYFLOAT},
+    {"decr",DECR},
+    {"decrby",DECRBY},
+    {"mset",MSET},
+    {"mget",MGET},
+    {"strlen",STRLEN},
+    {"append",APPEND},
+    {"keys",KEYS},
+    
 };
 
 
