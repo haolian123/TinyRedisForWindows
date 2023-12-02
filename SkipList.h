@@ -8,8 +8,6 @@
 #include<string>
 #include<fstream>
 #include<mutex>
-
-
 #include"global.h"
 #define MAX_SKIP_LIST_LEVEL 32
 #define  PROBABILITY_FACTOR 0.25
