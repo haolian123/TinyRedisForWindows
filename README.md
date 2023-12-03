@@ -97,3 +97,5 @@ public:
 4. 命令行检错需进一步完善。
 5. 待补充……
 
+## 参考
+SkipList.h 借鉴了项目https://github.com/youngyangyang04/Skiplist-CPP.git的实现。
