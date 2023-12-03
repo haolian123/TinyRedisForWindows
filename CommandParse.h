@@ -9,11 +9,11 @@
 
 class CommandParser{
 protected:
-    static std::shared_ptr<RedisClient>redisClient;
+    static std::shared_ptr<RedisHelper>redisHelper;
 public:
     virtual std::string parse(std::vector<std::string>& tokens)=0;
 };
-std::shared_ptr<RedisClient> CommandParser::redisClient=std::make_shared<RedisClient>();
+std::shared_ptr<RedisHelper> CommandParser::redisHelper=std::make_shared<RedisHelper>();
 
 // select
 class SelectParser:public CommandParser{
@@ -28,7 +28,7 @@ public:
         }catch(std::invalid_argument const &e){
             return tokens[1] +" is not a numeric type";
         }
-        return redisClient->select(index);
+        return redisHelper->select(index);
     }
 };
 
@@ -41,12 +41,12 @@ public:
         }
         if(tokens.size()==4){
             if(tokens.back()=="NX"){
-                return redisClient->set(tokens[1],tokens[2],NX);
+                return redisHelper->set(tokens[1],tokens[2],NX);
             }else if(tokens.back()=="XX"){
-                return redisClient->set(tokens[1],tokens[2],XX);
+                return redisHelper->set(tokens[1],tokens[2],XX);
             }
         }
-        return redisClient->set(tokens[1],tokens[2]);
+        return redisHelper->set(tokens[1],tokens[2]);
     }
 };
 
@@ -57,7 +57,7 @@ public:
         if(tokens.size()<3){
             return "wrong number of arguments for SETNX.";
         }
-        return redisClient->setnx(tokens[1],tokens[2]);
+        return redisHelper->setnx(tokens[1],tokens[2]);
     }
 };
 //setex
@@ -67,7 +67,7 @@ public:
         if(tokens.size()<3){
             return "wrong number of arguments for SETEX.";
         }
-        return redisClient->setex(tokens[1],tokens[2]);
+        return redisHelper->setex(tokens[1],tokens[2]);
     }
 };
 
@@ -78,14 +78,14 @@ public:
         if(tokens.size()<2){
             return "wrong number of arguments for GET.";
         }
-        return redisClient->get(tokens[1]);
+        return redisHelper->get(tokens[1]);
     }
 };
 //keys
 class KeysParser:public CommandParser{
 public:
     std::string parse(std::vector<std::string>& tokens){
-        return redisClient->keys();
+        return redisHelper->keys();
     }
 };
 
@@ -93,7 +93,7 @@ public:
 class DBSizeParser:public CommandParser{
 public:
     std::string parse(std::vector<std::string>& tokens){
-        return redisClient->dbsize();
+        return redisHelper->dbsize();
     }
 };
 
@@ -105,7 +105,7 @@ public:
             return "wrong number of arguments for EXISTS.";
         }
         tokens.erase(tokens.begin());
-        return redisClient->exists(tokens);
+        return redisHelper->exists(tokens);
     }
 };
 //del
@@ -116,7 +116,7 @@ public:
             return "wrong number of arguments for DEL.";
         }
         tokens.erase(tokens.begin());
-        return redisClient->del(tokens);
+        return redisHelper->del(tokens);
     }
 };
 //rename
@@ -126,7 +126,7 @@ public:
         if(tokens.size()<3){
             return "wrong number of arguments for RENAME.";
         }
-        return redisClient->rename(tokens[1],tokens[2]);
+        return redisHelper->rename(tokens[1],tokens[2]);
     }
 };
 //incr
@@ -136,7 +136,7 @@ public:
         if(tokens.size()<2){
             return "wrong number of arguments for INCR.";
         }
-        return redisClient->incr(tokens[1]);
+        return redisHelper->incr(tokens[1]);
     }
 };
 //incryby
@@ -152,7 +152,7 @@ public:
         }catch(std::invalid_argument const &e){
             return tokens[2] +" is not a numeric type";
         }
-        return redisClient->incrby(tokens[1],increment);
+        return redisHelper->incrby(tokens[1],increment);
     }
 };
 //incrbyfloat
@@ -168,7 +168,7 @@ public:
         }catch(std::invalid_argument const &e){
             return tokens[2] +" is not a numeric type";
         }
-        return redisClient->incrbyfloat(tokens[1],increment);
+        return redisHelper->incrbyfloat(tokens[1],increment);
     }
 };
 //decr
@@ -178,7 +178,7 @@ public:
         if(tokens.size()<2){
             return "wrong number of arguments for DECR.";
         }
-        return redisClient->decr(tokens[1]);
+        return redisHelper->decr(tokens[1]);
     }
 };
 
@@ -195,7 +195,7 @@ public:
         }catch(std::invalid_argument const &e){
             return tokens[2] +" is not a numeric type";
         }
-        return redisClient->decrby(tokens[1],increment);
+        return redisHelper->decrby(tokens[1],increment);
     }
 };
 
@@ -207,7 +207,7 @@ public:
             return "wrong number of arguments for MSET.";
         }
         tokens.erase(tokens.begin());
-        return redisClient->mset(tokens);
+        return redisHelper->mset(tokens);
     }
 };
 
@@ -219,7 +219,7 @@ public:
             return "wrong number of arguments for MGET.";
         }
         tokens.erase(tokens.begin());
-        return redisClient->mget(tokens);
+        return redisHelper->mget(tokens);
     }
 };
 
@@ -230,7 +230,7 @@ public:
         if(tokens.size()<2){
             return "wrong number of arguments for STRLEN.";
         }
-        return redisClient->strlen(tokens[1]);
+        return redisHelper->strlen(tokens[1]);
     }
 };
 //append
@@ -240,7 +240,7 @@ public:
         if(tokens.size()<3){
             return "wrong number of arguments for APPEND.";
         }
-        return redisClient->append(tokens[1],tokens[2]);
+        return redisHelper->append(tokens[1],tokens[2]);
     }
 };
 #endif
