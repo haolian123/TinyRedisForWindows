@@ -11,6 +11,7 @@ class CommandParser{
 protected:
     static std::shared_ptr<RedisHelper>redisHelper;
 public:
+    static std::shared_ptr<RedisHelper> getRedisHelper(){return CommandParser::redisHelper;}
     virtual std::string parse(std::vector<std::string>& tokens)=0;
 };
 std::shared_ptr<RedisHelper> CommandParser::redisHelper=std::make_shared<RedisHelper>();
