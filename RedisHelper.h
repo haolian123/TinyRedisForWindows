@@ -1,9 +1,12 @@
 #ifndef REDISHELPER_H
 #define REDISHELPER_H
+#include<windows.h>
 #include"SkipList.h"
-// #include"global.h"
+
 const std::string DEFAULT_DB_FOLDER="data_files";
 const std::string DATABASE_FILE_NAME="db";
+const int DATABASE_FILE_NUMBER=15;
+
 //增删改查操作
 class RedisHelper{
 private:
@@ -13,11 +16,12 @@ public:
     RedisHelper();
     ~RedisHelper();
 private:
-    void flush();
+    
     //从文件中加载
     void loadData(std::string loadPath);
     std::string getFilePath();
 public:
+    void flush();
     //选择数据库
     std::string select(int index);
 

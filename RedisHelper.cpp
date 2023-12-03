@@ -1,5 +1,5 @@
 #include"RedisHelper.h"
-
+#include"FileCreator.h"
 
 
 void RedisHelper::flush(){
@@ -34,7 +34,7 @@ void RedisHelper::loadData(std::string loadPath){
 
 //选择数据库
 std::string RedisHelper::select(int index){
-    if(index<0||index>15){
+    if(index<0||index>DATABASE_FILE_NUMBER-1){
         return "database index out of range.";
     }
     flush();
@@ -59,7 +59,11 @@ std::string RedisHelper::keys(const std::string pattern){
         res+=std::to_string(++count)+") "+"\""+node->key+"\""+"\n";
         node=node->forward[0];
     }
-    res.pop_back();
+    if(!res.empty())
+        res.pop_back();
+    else{
+        res="this database is empty!";
+    }
     return res;
 }
 // 获取键总数
@@ -301,6 +305,8 @@ std::string RedisHelper::append(const std::string&key,const std::string &value){
 
 
 RedisHelper::RedisHelper(){
+    // createSaveFiles();
+    FileCreator::createFolderAndFiles(DEFAULT_DB_FOLDER,DATABASE_FILE_NAME,DATABASE_FILE_NUMBER);
     std::string filePath=getFilePath();
     loadData(filePath);
 }
