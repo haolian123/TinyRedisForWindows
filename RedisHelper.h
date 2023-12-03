@@ -5,13 +5,13 @@
 const std::string DEFAULT_DB_FOLDER="data_files";
 const std::string DATABASE_FILE_NAME="db";
 //增删改查操作
-class RedisClient{
+class RedisHelper{
 private:
     std::string dataBaseIndex="0";
     std::shared_ptr<SkipList<std::string, std::string>> redisDataBase = std::make_shared<SkipList<std::string, std::string>>();
 public:
-    RedisClient();
-    ~RedisClient();
+    RedisHelper();
+    ~RedisHelper();
 private:
     void flush();
     //从文件中加载

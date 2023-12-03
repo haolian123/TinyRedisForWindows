@@ -2,7 +2,7 @@
 
 
 
-void RedisClient::flush(){
+void RedisHelper::flush(){
     // 打开文件并覆盖写入
     std::string filePath=getFilePath();
     std::ofstream outputFile(filePath);
@@ -22,18 +22,18 @@ void RedisClient::flush(){
     outputFile.close();
 }
 
-std::string RedisClient::getFilePath(){
+std::string RedisHelper::getFilePath(){
     std::string filePath=DEFAULT_DB_FOLDER+"/"+DATABASE_FILE_NAME+dataBaseIndex;
     return filePath;
 }
 
 //从文件中加载
-void RedisClient::loadData(std::string loadPath){
+void RedisHelper::loadData(std::string loadPath){
     redisDataBase->loadFile(loadPath);
 }
 
 //选择数据库
-std::string RedisClient::select(int index){
+std::string RedisHelper::select(int index){
     if(index<0||index>15){
         return "database index out of range.";
     }
@@ -51,7 +51,7 @@ std::string RedisClient::select(int index){
 // 127.0.0.1:6379> keys *
 // 1) "javastack"
 // *表示通配符，表示任意字符，会遍历所有键显示所有的键列表，时间复杂度O(n)，在生产环境不建议使用。
-std::string RedisClient::keys(const std::string pattern){
+std::string RedisHelper::keys(const std::string pattern){
     std::string res="";
     auto node=redisDataBase->getHead()->forward[0];
     int count=0;
@@ -67,7 +67,7 @@ std::string RedisClient::keys(const std::string pattern){
 // 127.0.0.1:6379> dbsize
 // (integer) 6
 // 获取键总数时不会遍历所有的键，直接获取内部变量，时间复杂度O(1)。
-std::string RedisClient::dbsize()const{
+std::string RedisHelper::dbsize()const{
     std::string res="(integer) " +std::to_string(redisDataBase->size());
     return res;
 }
@@ -76,7 +76,7 @@ std::string RedisClient::dbsize()const{
 // 127.0.0.1:6379> exists javastack java
 // (integer) 2
 // 查询查询多个，返回存在的个数。
-std::string RedisClient::exists(const std::vector<std::string>&keys){
+std::string RedisHelper::exists(const std::vector<std::string>&keys){
     int count=0;
     for(auto& key:keys){
         if(redisDataBase->searchItem(key)!=nullptr){
@@ -91,7 +91,7 @@ std::string RedisClient::exists(const std::vector<std::string>&keys){
 // 127.0.0.1:6379> del java javastack
 // (integer) 1
 // 可以删除多个，返回删除成功的个数。
-std::string RedisClient::del(const std::vector<std::string>&keys){
+std::string RedisHelper::del(const std::vector<std::string>&keys){
     int count=0;
     for(auto& key:keys){
         if(redisDataBase->deleteItem(key)){
@@ -106,7 +106,7 @@ std::string RedisClient::del(const std::vector<std::string>&keys){
 // 语法：rename key newkey
 // 127.0.0.1:6379[2]> rename javastack javastack123
 // OK
-std::string RedisClient::rename(const std::string&oldName,const std::string&newName){
+std::string RedisHelper::rename(const std::string&oldName,const std::string&newName){
     auto currentNode=redisDataBase->searchItem(oldName);
     std::string resMessage="";
     if(currentNode==nullptr){
@@ -122,7 +122,7 @@ std::string RedisClient::rename(const std::string&oldName,const std::string&newN
 // 存放键值
 // 语法：set key value [EX seconds] [PX milliseconds] [NX|XX]
 // nx：如果key不存在则建立，xx：如果key存在则修改其值，也可以直接使用setnx/setex命令。
-std::string RedisClient::set(const std::string& key, const std::string& value,const SET_MODEL model){
+std::string RedisHelper::set(const std::string& key, const std::string& value,const SET_MODEL model){
     if(model==XX){
         return setex(key,value);
     }else if(model==NX){
@@ -139,7 +139,7 @@ std::string RedisClient::set(const std::string& key, const std::string& value,co
     return "OK";
 }
 
-std::string RedisClient::setnx(const std::string& key, const std::string& value){
+std::string RedisHelper::setnx(const std::string& key, const std::string& value){
     auto currentNode=redisDataBase->searchItem(key);
     if(currentNode!=nullptr){
         return "key: "+ key +"  exists!";
@@ -149,7 +149,7 @@ std::string RedisClient::setnx(const std::string& key, const std::string& value)
     }
     return "OK";
 }
-std::string RedisClient::setex(const std::string& key, const std::string& value){
+std::string RedisHelper::setex(const std::string& key, const std::string& value){
     auto currentNode=redisDataBase->searchItem(key);
     if(currentNode==nullptr){
         return "key: "+ key +" does not exist!";
@@ -164,7 +164,7 @@ std::string RedisClient::setex(const std::string& key, const std::string& value)
 // 语法：get key
 // 127.0.0.1:6379[2]> get javastack
 // "666"
-std::string RedisClient::get(const std::string&key){
+std::string RedisHelper::get(const std::string&key){
     auto currentNode=redisDataBase->searchItem(key);
     if(currentNode==nullptr){
         return "key: "+ key +" does not exist!";
@@ -179,10 +179,10 @@ std::string RedisClient::get(const std::string&key){
 // 127.0.0.1:6379[2]> incr javastack
 // (integer) 667
 // 一次想递增N用incrby命令，如果是浮点型数据可以用incrbyfloat命令递增。
-std::string RedisClient::incr(const std::string& key){
+std::string RedisHelper::incr(const std::string& key){
     return incrby(key,1);
 }
-std::string RedisClient::incrby(const std::string& key,int increment){
+std::string RedisHelper::incrby(const std::string& key,int increment){
     auto currentNode=redisDataBase->searchItem(key);
     std::string value="";
     if(currentNode==nullptr){
@@ -203,7 +203,7 @@ std::string RedisClient::incrby(const std::string& key,int increment){
     std::string res="(integer) "+value;
     return res;
 }
-std::string RedisClient::incrbyfloat(const std::string&key,double increment){
+std::string RedisHelper::incrbyfloat(const std::string&key,double increment){
     auto currentNode=redisDataBase->searchItem(key);
     std::string value="";
     if(currentNode==nullptr){
@@ -224,10 +224,10 @@ std::string RedisClient::incrbyfloat(const std::string&key,double increment){
     return res;
 }
 // 同样，递减使用decr、decrby命令。
-std::string RedisClient::decr(const std::string&key){
+std::string RedisHelper::decr(const std::string&key){
     return incrby(key,-1);
 }
-std::string RedisClient::decrby(const std::string&key,int increment){
+std::string RedisHelper::decrby(const std::string&key,int increment){
     return incrby(key,-increment);
 }
 // 批量存放键值
@@ -235,7 +235,7 @@ std::string RedisClient::decrby(const std::string&key,int increment){
 // 127.0.0.1:6379[2]> mset java1 1 java2 2 java3 3
 // OK
 
-std::string RedisClient::mset(std::vector<std::string>&items){
+std::string RedisHelper::mset(std::vector<std::string>&items){
     if(items.size()%2!=0){
         return "wrong number of arguments for MSET.";
     }
@@ -252,7 +252,7 @@ std::string RedisClient::mset(std::vector<std::string>&items){
 // 1) "1"
 // 2) "2"
 // Redis接收的是UTF-8的编码，如果是中文一个汉字将占3位返回。
-std::string RedisClient::mget(std::vector<std::string>&keys){
+std::string RedisHelper::mget(std::vector<std::string>&keys){
     if(keys.size()==0){
         return "wrong number of arguments for MGET.";
     }
@@ -277,7 +277,7 @@ std::string RedisClient::mget(std::vector<std::string>&keys){
 // 获取值长度
 // 语法：strlen key
 // 127.0.0.1:6379[2]> strlen javastack (integer) 3
-std::string RedisClient::strlen(const std::string& key){
+std::string RedisHelper::strlen(const std::string& key){
     auto currentNode=redisDataBase->searchItem(key);
     if(currentNode==nullptr){
         return "(integer) 0";
@@ -289,7 +289,7 @@ std::string RedisClient::strlen(const std::string& key){
 // 127.0.0.1:6379[2]> append javastack hi
 // (integer) 5
 // 向键值尾部添加，如上命令执行后由666变成666hi
-std::string RedisClient::append(const std::string&key,const std::string &value){
+std::string RedisHelper::append(const std::string&key,const std::string &value){
     auto currentNode=redisDataBase->searchItem(key);
     if(currentNode==nullptr){
         redisDataBase->addItem(key,value);
@@ -300,8 +300,8 @@ std::string RedisClient::append(const std::string&key,const std::string &value){
 }
 
 
-RedisClient::RedisClient(){
+RedisHelper::RedisHelper(){
     std::string filePath=getFilePath();
     loadData(filePath);
 }
-RedisClient::~RedisClient(){flush();}
+RedisHelper::~RedisHelper(){flush();}
