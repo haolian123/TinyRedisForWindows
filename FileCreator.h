@@ -25,7 +25,6 @@ bool FileCreator::createDirectory(const std::string& path) {
         // 文件夹已存在
         return true;
     }
-
     // 路径存在，但不是文件夹
     return false;
 }
@@ -42,11 +41,10 @@ void FileCreator::createAllParentDirectories(const std::string& path) {
 void FileCreator::createFilesInDirectory(const std::string& path, const std::string& fileName, int numberOfFiles) {
     for (int i = 0; i < numberOfFiles; ++i) {
         std::ostringstream filePath;
-        filePath << path << "\\" << fileName << i ; // Assuming .txt extension
+        filePath << path << "\\" << fileName << i ; 
 
-        // Check if file already exists
         if (isFileExists(filePath.str())) {
-            continue; // Skip to the next iteration
+            continue; 
         }
         std::ofstream file(filePath.str());
         if (file.is_open()) {
