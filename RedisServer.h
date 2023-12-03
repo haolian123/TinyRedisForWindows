@@ -12,11 +12,14 @@
 #include <functional>
 #include <stdexcept>
 #include <winsock2.h>
+#include<windows.h>
 #include <iomanip>
 #include <chrono>
 #include <ctime>
 #include"ParserFlyweightFactory.h"
+#include<signal.h>
 #pragma comment(lib, "ws2_32.lib") // Winsock Library
+
 class RedisServer{
 private:
     WSADATA wsa;
@@ -24,13 +27,17 @@ private:
     struct sockaddr_in server, client;
     int c;
     int port;
+    bool stop=false;
     DWORD pid;
     std::string logoFilePath;
     RedisServer(int port=8888,std::string logoFilePath="logo"):port(port),logoFilePath(logoFilePath){
         pid = GetCurrentProcessId();
     }
     void handleClient(int clientSocket);
-    
+    // 信号处理函数
+    // 控制台事件处理函数
+    // static BOOL WINAPI ConsoleHandler(DWORD signal);
+    static void signalHandler( int sig );
     bool initWinsock();
     void createSocket();
     void initServer();
@@ -41,6 +48,7 @@ private:
     void replaceText(std::string& text,const std::string& toReplaceText, const std::string& replaceText);
     std::string getDate();
 public:
+
     static std::shared_ptr<RedisServer> getInstance(){
         static std::shared_ptr<RedisServer> instance(new RedisServer());
         return instance;
@@ -109,11 +117,13 @@ void RedisServer::printStartMessage(){
     std::cout<<initMessage<<std::endl;
 }
 void RedisServer::start(){
-
+    
     // 初始化Winsock库
     if(!initWinsock()){
         return ;
     }
+    // 设置信号处理函数
+    signal( SIGINT, signalHandler );
     // 创建一个套接字
     createSocket();
     // 准备sockaddr_in结构体
@@ -128,6 +138,8 @@ void RedisServer::start(){
     // 监听传入的连接
     listen(serverSocket , 3);
     while(true){
+        if(stop)
+            break;
         c = sizeof(struct sockaddr_in);
         int clientSocket = accept(serverSocket, (struct sockaddr *)&client, &c);
         if (clientSocket == INVALID_SOCKET) {
@@ -141,16 +153,19 @@ void RedisServer::start(){
         std::thread clientThread(&RedisServer::handleClient, this, clientSocket);
         clientThread.detach(); // 不阻塞主线程
     }
+
 }
 
 void RedisServer::handleClient(int clientSocket) {
     // 与客户端通信的代码
     // 接收数据、处理数据、发送响应
     //向客户端发送数据
-   
+    
     ParserFlyweightFactory flyweightFactory;
     
     while(true){
+        if(stop)
+            break;
         //接收客户端传来的数据
         char clientMessage[2000];
         int recv_size;
@@ -168,13 +183,8 @@ void RedisServer::handleClient(int clientSocket) {
             }
             send(clientSocket , responseMessage.c_str() , responseMessage.size() , 0);
         }
-
-        
     }
-
-
 }
-
 
 void RedisServer::replaceText(std::string& text,const std::string& toReplaceText, const std::string& newText){
     int index=text.find(toReplaceText);
@@ -182,7 +192,6 @@ void RedisServer::replaceText(std::string& text,const std::string& toReplaceText
         // std::cout<<"toReplaceText="<<toReplaceText<<std::endl;
         text.replace(index,toReplaceText.size(),newText);
 }
-
 
 std::string RedisServer::getDate(){
     // 获取当前时间点
@@ -202,4 +211,12 @@ std::string RedisServer::getDate(){
     oss << "." << std::setfill('0') << std::setw(3) << milliseconds.count();
 
     return oss.str();
+}
+void  RedisServer::signalHandler( int sig )
+{
+    if ( sig == SIGINT)
+    {
+        CommandParser::getRedisHelper()->flush();
+        exit(0);
+    }
 }
