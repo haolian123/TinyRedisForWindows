@@ -34,7 +34,7 @@ private:
     int elementNumber=0;
     std::ofstream writeFile;
     std::ifstream readFile;
-    // std::mutex mutex;
+    std::mutex mutex;
 private:
     //随机生成新节点的层数
     int randomLevel();
@@ -60,7 +60,7 @@ public:
 
 template<typename Key,typename Value>
 bool SkipList<Key,Value>::addItem(const Key& key,const Value& value){
-    // std::unique_lock<std::mutex>locker(this->mutex);
+    mutex.lock();
     auto currentNode=this->head;
     std::vector<std::shared_ptr<SkipListNode<Key,Value>>>update(MAX_SKIP_LIST_LEVEL,head);
     for(int i=currentLevel-1;i>=0;i--){
@@ -77,6 +77,7 @@ bool SkipList<Key,Value>::addItem(const Key& key,const Value& value){
         update[i]->forward[i]=newNode;
     }
     elementNumber++;
+    mutex.unlock();
     return true;
 }
 
@@ -84,20 +85,23 @@ template<typename Key,typename Value>
 bool SkipList<Key,Value>::modifyItem(const Key&key, const Value& value){
 
     std::shared_ptr<SkipListNode<Key,Value>> targetNode=this->searchItem(key);
-    std::unique_lock<std::mutex>locker(this->mutex);
+    mutex.lock();
     if(targetNode==nullptr){
+        mutex.unlock();
         return false;
     }
     targetNode->value=value;
+    mutex.unlock();
     return true;
 
 }
 
 template<typename Key,typename Value>
 std::shared_ptr<SkipListNode<Key,Value>> SkipList<Key,Value>::searchItem(const Key& key){
-    // std::unique_lock<std::mutex>locker(this->mutex);
+    mutex.lock();
     std::shared_ptr<SkipListNode<Key,Value>> currentNode=this->head;
     if(!currentNode){
+        mutex.unlock();
         return nullptr;
     }
     for(int i=currentLevel-1;i>=0;i--){
@@ -107,14 +111,16 @@ std::shared_ptr<SkipListNode<Key,Value>> SkipList<Key,Value>::searchItem(const K
     }
     currentNode=currentNode->forward[0];
     if(currentNode&&currentNode->key==key){
+        mutex.unlock();
         return currentNode;
     }
+    mutex.unlock();
     return nullptr;
 }
 
 template<typename Key,typename Value>
 bool SkipList<Key,Value>::deleteItem(const Key& key){
-    // std::unique_lock<std::mutex>locker(this->mutex);
+    mutex.lock();
     std::shared_ptr<SkipListNode<Key,Value>> currentNode=this->head;
     std::vector<std::shared_ptr<SkipListNode<Key,Value>>>update(MAX_SKIP_LIST_LEVEL,head);
     for(int i=currentLevel-1;i>=0;i--){
@@ -125,6 +131,7 @@ bool SkipList<Key,Value>::deleteItem(const Key& key){
     }
     currentNode=currentNode->forward[0];
     if(!currentNode||currentNode->key!=key){
+        mutex.unlock();
         return false;
     }
     for(int i=0;i<currentLevel;i++){
@@ -138,12 +145,13 @@ bool SkipList<Key,Value>::deleteItem(const Key& key){
         currentLevel--;
     }
     elementNumber--;
+    mutex.unlock();
     return true;
 }
 
 template<typename Key,typename Value>
 void SkipList<Key,Value>::printList(){
-    
+    mutex.lock();
     for(int i=currentLevel;i>=0;i--){
         auto node=this->head->forward[i];
         std::cout<<"Level"<<i+1<<":";
@@ -153,10 +161,12 @@ void SkipList<Key,Value>::printList(){
         }
         std::cout<<std::endl;
     }
+    mutex.unlock();
 }
 
 template<typename Key,typename Value>
 void SkipList<Key,Value>::dumpFile( std::string save_path){
+    mutex.lock();
     writeFile.open(save_path);
     auto node=this->head->forward[0];
     while(node!=nullptr){
@@ -165,14 +175,17 @@ void SkipList<Key,Value>::dumpFile( std::string save_path){
     }
     writeFile.flush();
     writeFile.close();
+    mutex.unlock();
 }
 
 
 
 template<typename Key,typename Value>
 void SkipList<Key,Value>::loadFile(std::string load_path){
+
     readFile.open(load_path);
     if(!readFile.is_open()){
+        mutex.unlock();
         return;
     }
     std::string line;
@@ -184,6 +197,7 @@ void SkipList<Key,Value>::loadFile(std::string load_path){
         }
     }
     readFile.close();
+
 }
 
 
@@ -212,7 +226,10 @@ bool SkipList<Key,Value>::parseString(const std::string&line,std::string&key,std
 
 template<typename Key,typename Value>
 int SkipList<Key,Value>::size(){
-    return this->elementNumber;
+    mutex.lock();
+    int ret=this->elementNumber;
+    mutex.unlock();
+    return ret;
 }
 
 
